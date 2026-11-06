@@ -1,0 +1,19 @@
+{
+  "methods": [
+    "google",
+    "apple",
+    "x",
+    "email"
+  ],
+  "headline": "Create your student account or sign in",
+  "subtitle": "Verify your email securely. Passwordless sign-in is managed by your identity provider.", 
+  "style": {
+    "mode": "light",
+    "accentColor": "#6556D9",
+    "backgroundColor": "#F5F6FB",
+    "panelColor": "#FFFFFF",
+    "textColor": "#172033",
+    "fontFamily": "Inter, system-ui, sans-serif",
+    "borderRadius": 14
+  }
+}

@@ -1,0 +1,207 @@
+[
+  {
+    "name": "Authentication, student registration and session lifecycle",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": [
+      "first-time email identity registration",
+      "passwordless provider login",
+      "duplicate identity handling",
+      "student profile onboarding",
+      "session restoration",
+      "logout",
+      "anonymous protected-page behavior"
+    ],
+    "description": "Verify provider-managed first-time account creation, returning login, profile setup, session persistence and logout.",
+    "steps": [
+      "Open a clean signed-out browser session and visit ExpenseBuddy",
+      "Verify private finance records are not rendered before authentication",
+      "Use the hosted AppDeploy login page and create a new QA identity using email verification",
+      "Verify the identity provider prevents duplicate accounts for an existing email and returns the user to the existing identity",
+      "Complete first-time onboarding with a full name and verify the authenticated email is displayed as read-only",
+      "Refresh and verify the authenticated session and student profile are restored",
+      "Sign out and verify protected content is hidden",
+      "Sign in again with the same identity and verify the same profile and records are loaded"
+    ],
+    "expected": "The provider creates or reuses a unique verified identity, first-time onboarding creates one student profile, refresh restores the session, and logout clears access. Authentication is passwordless email/provider-managed; the application must not collect passwords."
+  },
+  {
+    "name": "Expense and category lifecycle, validation, search and filters",
+    "viewport": "desktop",
+    "covers": [
+      "add/edit/delete expenses and income",
+      "expense history and details",
+      "nine default categories",
+      "custom category CRUD",
+      "duplicate category rejection",
+      "in-use category protection",
+      "required and positive amount validation",
+      "date validation",
+      "search",
+      "category/type/date/amount filters",
+      "persistence after reload"
+    ],
+    "description": "Exercise transaction and category workflows end-to-end, including negative inputs and category integrity.",
+    "steps": [
+      "Verify Food, Transportation, Education, Shopping, Entertainment, Healthcare, Accommodation, Utilities and Other default expense categories",
+      "Create a QA custom category and verify it appears in the category selector",
+      "Create an expense with title, amount, category, date and description; verify it appears in history and details",
+      "Edit the expense and verify updated fields persist after reload",
+      "Create an income transaction and verify its transaction type and amount",
+      "Search by title and description; verify matching results",
+      "Apply category, transaction type, date range, minimum and maximum amount filters; verify results",
+      "Attempt blank title, zero/negative amount, invalid date, and invalid category submissions; verify rejection",
+      "Attempt duplicate custom category creation and verify a clear conflict response",
+      "Attempt to delete or rename a category that is referenced by transactions and verify it is safely blocked",
+      "Delete the QA transaction and then delete the now-unused custom category"
+    ],
+    "expected": "Valid transactions and categories persist, search and filters narrow the expected results, invalid payloads are rejected, and category references are not broken."
+  },
+  {
+    "name": "Monthly budgets, calculations, threshold alerts and dashboard charts",
+    "viewport": "desktop",
+    "covers": [
+      "monthly budget create/edit",
+      "month isolation",
+      "total expenses",
+      "remaining budget",
+      "utilization percentage",
+      "normal/approaching/exceeded states",
+      "75/90/100 percent alerts",
+      "alert deduplication",
+      "income tracking",
+      "real-data dashboard charts",
+      "category doughnut breakdown",
+      "income-versus-expense chart"
+    ],
+    "description": "Verify deterministic monthly finance calculations and alert thresholds using dedicated QA data.",
+    "steps": [
+      "Choose a QA month without a budget and verify the no-budget state",
+      "Set a budget of 10000 and add expense records totaling 7500",
+      "Verify expenses=7500, remaining=2500 and utilization=75 percent; verify the 75 percent alert",
+      "Increase expenses to 9000 and verify the 90 percent alert",
+      "Increase expenses to 10000 and verify the 100 percent alert and exceeded state",
+      "Reload and verify already-delivered threshold alerts are not repeated",
+      "Edit the budget and verify previously delivered threshold markers remain recorded",
+      "Select another month and verify its budget and expense calculations are independent",
+      "Record income and verify dashboard income totals update",
+      "Verify monthly spending, category breakdown and income-versus-expense charts reflect the actual QA records",
+      "Verify no sample or fabricated amounts are presented as the student's actual data"
+    ],
+    "expected": "All monthly totals and percentages match the QA transactions, alert thresholds are delivered once, budget records remain month-specific and charts show stored user data."
+  },
+  {
+    "name": "Reports, savings goals, profile and settings",
+    "viewport": "desktop",
+    "covers": [
+      "CSV export",
+      "PDF/print export",
+      "selected-month report scope",
+      "CSV formula injection protection",
+      "PDF HTML escaping",
+      "savings goal CRUD",
+      "savings contributions and progress",
+      "profile name/institution/currency updates",
+      "identity email read-only",
+      "settings and logout"
+    ],
+    "description": "Verify reporting, savings and student profile workflows with safe handling of untrusted transaction text.",
+    "steps": [
+      "Create a QA savings goal and add a contribution; verify saved amount and progress",
+      "Reload and verify the savings goal persists",
+      "Update profile name, institution and preferred currency; reload and verify persistence",
+      "Verify account email comes from the authenticated identity and is read-only",
+      "Create QA transactions in the selected month and a different month",
+      "Export CSV and verify only the selected month's matching report records are included",
+      "Verify cells beginning with spreadsheet formula characters are neutralized",
+      "Open PDF/print export and verify selected-month totals and transaction rows",
+      "Use a description containing HTML-like text and verify it is displayed as inert text in the report",
+      "Verify Settings clearly explains passwordless provider authentication and does not advertise a nonfunctional password-change form",
+      "Remove QA data after verifying exports"
+    ],
+    "expected": "Savings and profile changes persist, CSV and PDF exports reflect the selected month, and untrusted values are safe in exported documents."
+  },
+  {
+    "name": "Backend authorization, data isolation and validation",
+    "viewport": "desktop",
+    "covers": [
+      "requireAuth on data routes",
+      "user ID derived table partitioning",
+      "cross-student IDOR read/update/delete protection",
+      "profile email spoofing prevention",
+      "transaction category ownership",
+      "invalid financial data rejection",
+      "database error handling",
+      "category/budget completeness fail-closed checks"
+    ],
+    "description": "Exercise backend authorization with two independent QA identities and direct authenticated API requests.",
+    "steps": [
+      "Actor A signs in and creates a uniquely named transaction, custom category, budget and savings goal",
+      "Record the returned record IDs",
+      "Actor A signs out and Actor B signs in using a different identity",
+      "Attempt to read, update and delete Actor A record IDs as Actor B",
+      "Attempt to spoof Actor A profile identity or email as Actor B",
+      "Verify Actor B cannot read or modify Actor A records and sees only Actor B data",
+      "Submit missing title, invalid amount, impossible date, invalid month, unsupported currency and unknown category payloads",
+      "Verify backend rejects invalid values and does not create partial records",
+      "Verify category deletion/rename and monthly budget uniqueness checks fail closed if the relevant table read is incomplete",
+      "Sign back in as Actor A and verify original records are unchanged"
+    ],
+    "expected": "Protected APIs enforce ownership using the verified identity; cross-account access fails; invalid data and incomplete safety checks are rejected without corrupting existing records."
+  },
+  {
+    "name": "Responsive, reliability and compatibility regression",
+    "viewport": "mobile",
+    "covers": [
+      "320/375/390 mobile layout",
+      "tablet layout",
+      "desktop layout",
+      "navigation",
+      "table local overflow",
+      "chart responsiveness",
+      "keyboard focus",
+      "reduced motion",
+      "API/database errors",
+      "duplicate submit prevention",
+      "date behavior in Asia/Karachi timezone",
+      "browser compatibility"
+    ],
+    "description": "Regression checks across viewports and key reliability paths.",
+    "steps": [
+      "Open at 320px, 375px and 390px widths and verify there is no page-level horizontal overflow",
+      "Open at 768px tablet width and desktop width and verify navigation, charts, cards and tables adapt",
+      "Navigate every sidebar destination and verify no broken or inert navigation items",
+      "Verify tables scroll within their own container rather than forcing page overflow",
+      "Use keyboard navigation and verify focus indicators; enable reduced motion and verify animations are reduced",
+      "Simulate a failed API save and verify a useful error appears without a false success toast",
+      "Double-submit an expense form and verify only one transaction is created",
+      "Test month/date defaults at midnight and on the first day of a month in Asia/Karachi; verify local date/month is selected",
+      "Run the viewport checks in current Chrome, Firefox and Edge"
+    ],
+    "expected": "The app remains usable without page-level overflow, failures are surfaced safely, duplicate writes are guarded, and date defaults follow the student's local timezone. Browser checks must be individually recorded rather than inferred from a deployment smoke check."
+  },
+  {
+    "name": "Historical data limits, performance and operational recovery",
+    "viewport": "desktop",
+    "covers": [
+      "500 record boundary behavior",
+      "pagination warning",
+      "accurate totals limitations",
+      "three-second performance target measurement",
+      "persistent database",
+      "backup policy disclosure",
+      "restore procedure documentation"
+    ],
+    "description": "Verify explicit operating boundaries and record evidence for performance and recovery rather than assuming these requirements are met.",
+    "steps": [
+      "Use a QA account with enough records to cross a 500-item collection boundary",
+      "Verify the application warns that bootstrap data is incomplete and does not claim full-history totals",
+      "Verify budget alert calculations refuse to proceed when the complete expense history is unavailable",
+      "Measure authenticated cold and warm page loads under a documented normal test environment",
+      "Verify records survive logout, login and browser refresh",
+      "Review SECURITY-OPERATIONS.md for the configured backup and restore limitations",
+      "Do not mark backup/recovery complete until a platform backup and an actual restore have been demonstrated"
+    ],
+    "expected": "Incomplete record collections are clearly disclosed, performance results are measured, persistent data survives sessions, and backup/recovery remains explicitly unverified unless a restore drill succeeds."
+  }
+]
